@@ -241,67 +241,123 @@ batch of activations, respectively
 
         return w_q
 
-class QuantLinear(nn.Linear):
-    def __init__(self, in_features, out_features, bias=True, w_bits=8, a_bits=8):
-        super().__init__(in_features, out_features, bias)
-        self.weight_quantizer = LSQPlusWeightQuantizer(w_bits=w_bits, shape=self.weight.shape)
-        self.act_quantizer = LSQPlusActivationQuantizer(a_bits=a_bits)
-
-    def forward(self, input):
-        q_input = self.act_quantizer(input)
-        q_weight = self.weight_quantizer(self.weight)
-        return nn.functional.linear(q_input, q_weight, self.bias)
-
 class QuantConv2d(nn.Conv2d):
-    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0,
-                 dilation=1, groups=1, bias=True, w_bits=8, a_bits=8):
-        super().__init__(in_channels, out_channels, kernel_size, stride, padding, dilation, groups, bias)
-        self.weight_quantizer = LSQPlusWeightQuantizer(w_bits=w_bits, shape=self.weight.shape, per_channel=True)
-        self.act_quantizer = LSQPlusActivationQuantizer(a_bits=a_bits)
-
-    def forward(self, input):
-        q_input = self.act_quantizer(input)
-        q_weight = self.weight_quantizer(self.weight)
-        return nn.functional.conv2d(q_input, q_weight, self.bias, self.stride, self.padding, self.dilation, self.groups)
-
-def prepare(model, w_bits=8, a_bits=8):
-    model = copy.deepcopy(model)
+    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True, 
+                 w_bits=8, a_bits=8, all_positive=False, per_channel=False, batch_init=20):
+        super(QuantConv2d, self).__init__(in_channels, out_channels, kernel_size, stride, padding, dilation, groups, bias)
+        
+        # Weight quantizer
+        shape = self.weight.shape
+        self.weight_quantizer = LSQPlusWeightQuantizer(w_bits, all_positive, per_channel, batch_init, shape)
+        
+        # Activation quantizer
+        self.act_quantizer = LSQPlusActivationQuantizer(a_bits, all_positive, batch_init)
     
-    def convert_module(module):
-        for name, child in module.named_children():
-            if isinstance(child, nn.Conv2d):
-                q_layer = QuantConv2d(
-                    in_channels=child.in_channels,
-                    out_channels=child.out_channels,
-                    kernel_size=child.kernel_size,
-                    stride=child.stride,
-                    padding=child.padding,
-                    dilation=child.dilation,
-                    groups=child.groups,
-                    bias=child.bias is not None,
-                    w_bits=w_bits,
-                    a_bits=a_bits
-                )
-                q_layer.weight.data = child.weight.data.clone()
-                if child.bias is not None:
-                    q_layer.bias.data = child.bias.data.clone()
-                setattr(module, name, q_layer)
+    def forward(self, x):
+        # Quantize input activations
+        x_q = self.act_quantizer(x)
+        
+        # Quantize weights
+        w_q = self.weight_quantizer(self.weight)
+        
+        # Use quantized values for convolution
+        output = F.conv2d(
+            x_q, w_q, self.bias, self.stride, self.padding, self.dilation, self.groups
+        )
+        
+        return output
 
-            elif isinstance(child, nn.Linear):
-                q_layer = QuantLinear(
-                    in_features=child.in_features,
-                    out_features=child.out_features,
-                    bias=child.bias is not None,
-                    w_bits=w_bits,
-                    a_bits=a_bits
-                )
-                q_layer.weight.data = child.weight.data.clone()
-                if child.bias is not None:
-                    q_layer.bias.data = child.bias.data.clone()
-                setattr(module, name, q_layer)
 
-            else:
-                convert_module(child)
+class QuantLinear(nn.Linear):
+    def __init__(self, in_features, out_features, bias=True, 
+                 w_bits=8, a_bits=8, all_positive=False, per_channel=False, batch_init=20):
+        super(QuantLinear, self).__init__(in_features, out_features, bias)
+        
+        # Weight quantizer
+        shape = self.weight.shape
+        self.weight_quantizer = LSQPlusWeightQuantizer(w_bits, all_positive, per_channel, batch_init, shape)
+        
+        # Activation quantizer
+        self.act_quantizer = LSQPlusActivationQuantizer(a_bits, all_positive, batch_init)
+    
+    def forward(self, x):
+        # Quantize input activations
+        x_q = self.act_quantizer(x)
+        
+        # Quantize weights
+        w_q = self.weight_quantizer(self.weight)
+        
+        # Use quantized values for linear operation
+        output = F.linear(x_q, w_q, self.bias)
+        
+        return output
 
-    convert_module(model)
-    return model
+
+def prepare(model, w_bits=8, a_bits=8, all_positive=False, per_channel=False, batch_init=20):
+    """
+    Replaces Conv2d and Linear layers in the model with QuantConv2d and QuantLinear layers.
+    
+    Args:
+        model: The model to be quantized
+        w_bits: Number of bits for weight quantization
+        a_bits: Number of bits for activation quantization
+        all_positive: Whether the quantization is all positive
+        per_channel: Whether to use per-channel quantization for weights
+        batch_init: Number of batches for quantizer initialization
+        
+    Returns:
+        Quantized model with replaced layers
+    """
+    quant_model = copy.deepcopy(model)
+    
+    for name, module in list(quant_model.named_children()):
+        # If it's a container (like Sequential), recursively apply to its children
+        if len(list(module.children())) > 0:
+            setattr(quant_model, name, prepare(module, w_bits, a_bits, all_positive, per_channel, batch_init))
+        
+        # If it's a Conv2d layer, replace it with QuantConv2d
+        elif isinstance(module, nn.Conv2d):
+            quant_conv = QuantConv2d(
+                module.in_channels, 
+                module.out_channels,
+                module.kernel_size,
+                module.stride,
+                module.padding,
+                module.dilation,
+                module.groups,
+                module.bias is not None,
+                w_bits,
+                a_bits,
+                all_positive,
+                per_channel,
+                batch_init
+            )
+            
+            # Copy weights and bias if exists
+            quant_conv.weight.data = module.weight.data.clone()
+            if module.bias is not None:
+                quant_conv.bias.data = module.bias.data.clone()
+                
+            setattr(quant_model, name, quant_conv)
+            
+        # If it's a Linear layer, replace it with QuantLinear
+        elif isinstance(module, nn.Linear):
+            quant_linear = QuantLinear(
+                module.in_features,
+                module.out_features,
+                module.bias is not None,
+                w_bits,
+                a_bits,
+                all_positive,
+                per_channel,
+                batch_init
+            )
+            
+            # Copy weights and bias if exists
+            quant_linear.weight.data = module.weight.data.clone()
+            if module.bias is not None:
+                quant_linear.bias.data = module.bias.data.clone()
+                
+            setattr(quant_model, name, quant_linear)
+    
+    return quant_model

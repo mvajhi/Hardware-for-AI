@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -O2 -std=c99
+CFLAGS = -Wall -Wextra -std=c11 -O2
 TARGET = test_model
 SOURCES = main.c
 

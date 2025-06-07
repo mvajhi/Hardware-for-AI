@@ -450,6 +450,11 @@ int64_t Graph::onnx_ir_version(void)
 #include "nodes/upsample.h"
 #include "nodes/where.h"
 
+#include "nodes/lsqplus_round.h"
+#include "nodes/lsqplus_alsq.h"
+#include "nodes/lsqplus_wlsq.h"
+#include "nodes/identity.h"
+
 // Create a new onnx2c Node from an operand name of an ONNX Graph node.
 // NB: the onnx2c-special graph input and graph output nodes are not created here
 Node* Graph::createNode(const onnx::NodeProto &onnx_node)
@@ -471,6 +476,19 @@ Node* Graph::createNode(const onnx::NodeProto &onnx_node)
 		if( opName == "MatMul" )
 			opName = "MatMulInteger";
 	}
+
+	std::string domain = "";
+	if (onnx_node.has_domain())
+		domain = onnx_node.domain();
+
+	if (domain == "lsqplus_ops") {
+		if (opName == "Round") return new LSQPlusRound;
+		if (opName == "ALSQPlus") return new LSQPlusALSQ;
+		if (opName == "WLSQPlus") return new LSQPlusWLSQ;
+		ERROR("Unimplemented LSQPlus operator: " << opName);
+	}
+
+	if( opName == "Identity" )return new Identity;
 
 	if( opName == "Abs" )return new Elementwise("Abs");
 	if( opName == "Acos" )return new Elementwise("Acos");

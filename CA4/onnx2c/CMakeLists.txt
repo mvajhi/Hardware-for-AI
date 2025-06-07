@@ -58,6 +58,10 @@ target_compile_options(onnx2c_lib
 add_executable( onnx2c
 	src/main.cc
 	src/options.cc
+	src/nodes/lsqplus_round.h
+	src/nodes/lsqplus_alsq.h  
+	src/nodes/lsqplus_wlsq.h
+	src/nodes/identity.h
 	)
 target_compile_options(onnx2c
 	PRIVATE

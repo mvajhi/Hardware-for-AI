@@ -4,7 +4,7 @@
 #include <stdbool.h>
 
 // فایل C تولید شده توسط onnx2c را include کنید
-#include "q8_new2.c" 
+#include "q8_new3.c" 
 
 #define IMAGE_BATCH 1
 #define IMAGE_CHANNELS 3

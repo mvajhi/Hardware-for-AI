@@ -1,0 +1,15 @@
+[submodule "onnx"]
+	path = onnx
+	url = https://github.com/onnx/onnx.git
+[submodule "aixlog"]
+	path = aixlog
+	url = https://github.com/badaix/aixlog.git
+[submodule "args"]
+	path = args
+	url = https://github.com/Taywee/args.git
+[submodule "cmake_timestamp"]
+	path = cmake_timestamp
+	url = https://github.com/kraiskil/cmake_timestamp.git
+[submodule "benchmark"]
+	path = benchmark
+	url = https://github.com/google/benchmark.git

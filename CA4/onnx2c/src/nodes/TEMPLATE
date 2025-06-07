@@ -1,0 +1,90 @@
+/* This file is part of onnx2c.
+ *
+ * TEMPLATE node.
+ * When implementing a new node, use this template
+ * as a starting point.
+ *
+ * This file can be kept as a single .h file with an
+ * in-header implementation, or it can be split into
+ * a .h and a .cc file.
+ *
+ * Replace all occurances of TEMPLATE in this file.
+ * Some representative dummy implementation provided.
+ *
+ * The functions here are callbacks from the onnx2c
+ * framework. See node.h for more documentation.
+ */
+#include "node.h"
+
+namespace toC {
+
+class TEMPLATE : public Node {
+	public:
+	TEMPLATE() {
+		op_name = "TEMPLATE";
+	}
+	/* Examples of ONNX Operand attributes */
+	std::vector<float> a_floatarray_attribute;
+	int an_int_attribute;
+
+	// Mandatory "API" functions towards the rest of onnx2c
+	virtual void parseAttributes( onnx::NodeProto &node ) override;
+	virtual void resolve(void) override;
+	virtual void print(std::ostream &dst) const override;
+};
+
+
+/* Parse attributes, if this node has them. */
+void TEMPLATE::parseAttributes( onnx::NodeProto &node )
+{
+	for( const auto& a : node.attribute() ) {
+		LOG(TRACE) << "Parsing attribute " << a.name() << std::endl;
+		if( a.name() == "ingeger_attribute_name" )
+			an_int_attribute = parse_attribute_int(a);
+		else if( a.name() == "floatarray_attribute_name" )
+			a_floatarray_attribute = parse_attribute_floats(a);
+		else
+			LOG(ERROR) << "Ignoring attribute " << a.name() << " for node TEMPLATE/" << onnx_name << std::endl;
+	}
+}
+
+
+/* Assign input tensors, resolve output tensor shapes, allocate output tensors */
+void TEMPLATE::resolve(void)
+{
+	Tensor *input_1  = get_input_tensor(0);
+	// Name the parameters to the generated C function that implements this Node.
+	// The most "descriptive name" usually is the one this tensor has in the ONNX documentation.
+	// First one is typically named 'input', 'X', or 'A'
+	// In the onnx file the tensors have compilicated names that make sense only in the graph context.
+	name_input(0, "A");
+
+	if (get_number_of_inputs() == 2) {
+		Tensor *input_2_optional = get_input_tensor(1);
+		name_input(1, "descriptive_name");
+	}
+
+
+	/* Create output tensors.
+	 * Set data dimensions and data type for the created tensors. */
+	Tensor *t = new Tensor;
+	t->data_dim.push_back(42);
+	t->data_type = onnx::TensorProto_DataType_FLOAT;
+	register_output(t, "Y");
+
+	/* TODO: optional outputs? */
+}
+
+
+/* Body of the node implementing function */
+void TEMPLATE::print(std::ostream &dst) const
+{
+	INDT_1 << "/* Print info on this node here, for debugging purposes */" << std::endl;
+
+	/* Genereate the C code here */
+	INDT_2 << "Y[0] = 42 * A[0];" << std::endl;
+}
+
+
+} // namespace
+

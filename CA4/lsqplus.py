@@ -5,27 +5,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Function
 
-class Quantize(torch.nn.Module):
-    def __init__(self, n_bits, n_frac, sign=True):
-        super(Quantize, self).__init__()
-        self.n_bits = n_bits
-        self.n_frac = n_frac
-        i = self.n_bits - self.n_frac
-        if sign:
-            self.max = float(2 ** (i - 1) - 2 ** (-self.n_frac))
-            self.min = float(-2 ** (i - 1))
-        else:
-            self.max = float(2 ** (i) - 2 ** (-self.n_frac))
-            self.min = 0.0
-
-    def forward(self, x):
-        if torch.onnx.is_in_onnx_export():
-            return x
-        else:
-            n = float(2 ** self.n_frac)
-            xx = torch.floor(x * n) / n
-            clipped = torch.clip(xx, self.min, self.max)
-            return clipped
+CUSTOM_OP_DOMAIN = "lsqplus_ops"
+CUSTOM_OPSET_VERSION = 1
 
 class Round(Function):
     @staticmethod
@@ -39,12 +20,17 @@ class Round(Function):
         grad_input = grad_output.clone()
         return grad_input
 
+    @staticmethod
+    def symbolic(g, input):
+        return g.op(f"{CUSTOM_OP_DOMAIN}::Round", input).setType(input.type())
+
 class ALSQPlus(Function):
     @staticmethod
     def forward(ctx, weight, alpha, beta, g, Qn, Qp):
         ctx.save_for_backward(weight, alpha, beta)
         ctx.other = g, Qn, Qp
-        w_q = Round.apply(torch.div((weight - beta), alpha).clamp(Qn, Qp))
+        clamped_val = torch.div((weight - beta), alpha).clamp(Qn, Qp)
+        w_q = Round.apply(clamped_val)
         w_q = w_q * alpha + beta
         return w_q
 
@@ -55,33 +41,40 @@ class ALSQPlus(Function):
         q_w = (weight - beta) / alpha
         smaller = (q_w < Qn).float()
         bigger = (q_w > Qp).float()
-        between = 1.0 - smaller -bigger
+        between = 1.0 - smaller - bigger
         grad_alpha = ((smaller * Qn + bigger * Qp +
             between * Round.apply(q_w) - between * q_w)*grad_weight * g).sum().unsqueeze(dim=0)
         grad_beta = ((smaller + bigger) * grad_weight * g).sum().unsqueeze(dim=0)
         grad_weight = between * grad_weight
         return grad_weight, grad_alpha, grad_beta, None, None, None
 
+    @staticmethod
+    def symbolic(g, weight, alpha, beta, g_tensor, Qn, Qp):
+        # just 4 tensor input و 2 attribute
+        return g.op(f"{CUSTOM_OP_DOMAIN}::ALSQPlus",
+                    weight, alpha, beta, g_tensor,
+                    Qn_i=int(Qn),
+                    Qp_i=int(Qp)).setType(weight.type())
 
 class WLSQPlus(Function):
     @staticmethod
     def forward(ctx, weight, alpha, g, Qn, Qp, per_channel):
         ctx.save_for_backward(weight, alpha)
         ctx.other = g, Qn, Qp, per_channel
+        w_q, wq = None, None
         if per_channel:
             sizes = weight.size()
-            # weight = weight.contiguous().view(weight.size()[0], -1)
-            weight = weight.view(weight.size()[0], -1)
-            weight = torch.transpose(weight, 0, 1)
-            alpha = torch.broadcast_to(alpha, weight.size())
-            wq = Round.apply(torch.div(weight, alpha).clamp(Qn, Qp))
-            w_q = wq * alpha
-            w_q = torch.transpose(w_q, 0, 1)
-            # w_q = w_q.contiguous().view(sizes)
-            w_q = w_q.view(sizes)
-            wq = torch.transpose(wq, 0, 1).view(sizes)
+            weight_reshaped = weight.view(weight.size()[0], -1)
+            weight_reshaped = torch.transpose(weight_reshaped, 0, 1)
+            alpha_broadcasted = torch.broadcast_to(alpha, weight_reshaped.size())
+            clamped_val = torch.div(weight_reshaped, alpha_broadcasted).clamp(Qn, Qp)
+            wq_reshaped = Round.apply(clamped_val)
+            w_q_reshaped = wq_reshaped * alpha_broadcasted
+            w_q = torch.transpose(w_q_reshaped, 0, 1).view(sizes)
+            wq = torch.transpose(wq_reshaped, 0, 1).view(sizes)
         else:
-            wq = Round.apply(torch.div(weight, alpha).clamp(Qn, Qp))
+            clamped_val = torch.div(weight, alpha).clamp(Qn, Qp)
+            wq = Round.apply(clamped_val)
             w_q = wq * alpha
         return w_q, wq.detach()
 
@@ -91,14 +84,11 @@ class WLSQPlus(Function):
         g, Qn, Qp, per_channel = ctx.other
         if per_channel:
             sizes = weight.size()
-            # weight = weight.contiguous().view(weight.size()[0], -1)
-            weight = weight.view(weight.size()[0], -1)
-            weight = torch.transpose(weight, 0, 1)
-            alpha = torch.broadcast_to(alpha, weight.size())
-            q_w = weight / alpha
-            q_w = torch.transpose(q_w, 0, 1)
-            # q_w = q_w.contiguous().view(sizes)
-            q_w = q_w.view(sizes)
+            weight_reshaped = weight.view(weight.size()[0], -1)
+            weight_reshaped = torch.transpose(weight_reshaped, 0, 1)
+            alpha_broadcasted = torch.broadcast_to(alpha, weight_reshaped.size())
+            q_w_reshaped = weight_reshaped / alpha_broadcasted
+            q_w = torch.transpose(q_w_reshaped, 0, 1).view(sizes)
         else:
             q_w = weight / alpha
         smaller = (q_w < Qn).float()
@@ -107,13 +97,27 @@ class WLSQPlus(Function):
         if per_channel:
             grad_alpha = ((smaller * Qn + bigger * Qp +
                 between * Round.apply(q_w) - between * q_w)*grad_weight * g)
-            # grad_alpha = grad_alpha.contiguous().view(grad_alpha.size()[0], -1).sum(dim=1)
             grad_alpha = grad_alpha.view(grad_alpha.size()[0], -1).sum(dim=1)
         else:
             grad_alpha = ((smaller * Qn + bigger * Qp +
                 between * Round.apply(q_w) - between * q_w)*grad_weight * g).sum().unsqueeze(dim=0)
         grad_weight = between * grad_weight
         return grad_weight, grad_alpha, None, None, None, None
+
+    @staticmethod
+    def symbolic(g, weight, alpha, g_tensor, Qn, Qp, per_channel):
+        # just 3 tensor input و 3 attribute
+        outputs = g.op(f"{CUSTOM_OP_DOMAIN}::WLSQPlus",
+                    weight, alpha, g_tensor,
+                    Qn_i=int(Qn),
+                    Qp_i=int(Qp),
+                    per_channel_i=int(per_channel),
+                    outputs=2)
+        
+        outputs[0].setType(weight.type())
+        outputs[1].setType(weight.type())
+        return outputs
+
 
 class LSQPlusActivationQuantizer(nn.Module):
     def __init__(self, a_bits, all_positive=False,batch_init = 20):
@@ -124,11 +128,9 @@ class LSQPlusActivationQuantizer(nn.Module):
         self.all_positive = all_positive
         self.batch_init = batch_init
         if self.all_positive:
-            # unsigned activation is quantized to [0, 2^b-1]
             self.Qn = 0
             self.Qp = 2 ** a_bits - 1
         else:
-            # signed weight/activation is quantized to [-2^(b-1), 2^(b-1)-1]
             self.Qn = - 2 ** (a_bits - 1)
             self.Qp = 2 ** (a_bits - 1) - 1
         self.s = torch.nn.Parameter(torch.ones(1).squeeze(0), requires_grad=True)
@@ -147,7 +149,7 @@ class LSQPlusActivationQuantizer(nn.Module):
             elif self.init_state<self.batch_init:
                 mina = torch.min(activation.detach())
                 self.s.data = self.s.data*0.9 + 0.1*(torch.max(activation.detach()) - mina)/(self.Qp-self.Qn)
-                self.beta.data = self.s.data*0.9 + 0.1* (mina - self.s.data * self.Qn)
+                self.beta.data = self.beta.data*0.9 + 0.1* (mina - self.s.data * self.Qn)
                 self.init_state += 1
             elif self.init_state==self.batch_init:
                 self.init_state += 1
@@ -170,11 +172,9 @@ class LSQPlusWeightQuantizer(nn.Module):
         self.all_positive = all_positive
         self.batch_init = batch_init
         if self.all_positive:
-            # unsigned activation is quantized to [0, 2^b-1]
             self.Qn = 0
             self.Qp = 2 ** w_bits - 1
         else:
-            # signed weight/activation is quantized to [-2^(b-1), 2^(b-1)-1]
             self.Qn = - 2 ** (w_bits - 1)
             self.Qp = 2 ** (w_bits - 1) - 1
         self.per_channel = per_channel
@@ -190,17 +190,11 @@ class LSQPlusWeightQuantizer(nn.Module):
         self.g = torch.nn.Parameter(torch.ones(1).squeeze(0), requires_grad=True)
         
     def forward(self, weight):
-        '''
-        For this work, each layer of weights and each layer of activations has a distinct step size, represented
-as an fp32 value, initialized to 2h|v|i/√OP , computed on either the initial weights values or the first
-batch of activations, respectively
-        '''
         if self.training:
             if self.init_state==0:
                 self.div = 2**self.w_bits.item()-1
                 self.g.data = torch.tensor(1.0/math.sqrt(weight.numel() * self.Qp))
                 if self.per_channel:
-                    # weight_tmp = weight.detach().contiguous().view(weight.size()[0], -1)
                     weight_tmp = weight.detach().view(weight.size()[0], -1)
                     mean = torch.mean(weight_tmp, dim=1)
                     std = torch.std(weight_tmp, dim=1)
@@ -209,21 +203,20 @@ batch of activations, respectively
                 else:
                     mean = torch.mean(weight.detach())
                     std = torch.std(weight.detach())
-                    self.s.data = max([torch.abs(mean-3*std), torch.abs(mean + 3*std)])/self.div
+                    self.s.data = max(torch.abs(mean-3*std), torch.abs(mean + 3*std))/self.div
                 self.init_state += 1
             elif self.init_state<self.batch_init:
                 self.div = 2**self.w_bits.item()-1
                 if self.per_channel:
-                    # weight_tmp = weight.detach().contiguous().view(weight.size()[0], -1)
                     weight_tmp = weight.detach().view(weight.size()[0], -1)
                     mean = torch.mean(weight_tmp, dim=1)
                     std = torch.std(weight_tmp, dim=1)
                     v, _ = torch.max(torch.stack([torch.abs(mean-3*std), torch.abs(mean + 3*std)]), dim=0)
-                    self.s.data = v*0.9 + 0.1*v/self.div
+                    self.s.data = self.s.data*0.9 + 0.1*v/self.div
                 else:
                     mean = torch.mean(weight.detach())
                     std = torch.std(weight.detach())
-                    self.s.data = self.s.data*0.9 + 0.1*max([torch.abs(mean-3*std), torch.abs(mean + 3*std)])/self.div
+                    self.s.data = self.s.data*0.9 + 0.1*max(torch.abs(mean-3*std), torch.abs(mean + 3*std))/self.div
                 self.init_state += 1
             elif self.init_state==self.batch_init:
                 self.init_state += 1
@@ -232,7 +225,7 @@ batch of activations, respectively
             w_q = weight
         elif self.w_bits.item() == 1:
             print('！Binary quantization is not supported ！')
-            assert self.w_bits.item() != 1
+            assert self.a_bits.item() != 1
         else:
             if self.saved:
                 w_q, self.wq.data = WLSQPlus.apply(weight, self.s, self.g, self.Qn, self.Qp, self.per_channel)
@@ -245,53 +238,25 @@ class QuantConv2d(nn.Conv2d):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True, 
                  w_bits=8, a_bits=8, all_positive=False, per_channel=False, batch_init=20):
         super(QuantConv2d, self).__init__(in_channels, out_channels, kernel_size, stride, padding, dilation, groups, bias)
-        
-        # Weight quantizer
-        shape = self.weight.shape
-        self.weight_quantizer = LSQPlusWeightQuantizer(w_bits, all_positive, per_channel, batch_init, shape)
-        
-        # Activation quantizer
+        self.weight_quantizer = LSQPlusWeightQuantizer(w_bits, all_positive, per_channel, batch_init, self.weight.shape)
         self.act_quantizer = LSQPlusActivationQuantizer(a_bits, all_positive, batch_init)
     
     def forward(self, x):
-        # Quantize input activations
         x_q = self.act_quantizer(x)
-        
-        # Quantize weights
         w_q = self.weight_quantizer(self.weight)
-        
-        # Use quantized values for convolution
-        output = F.conv2d(
-            x_q, w_q, self.bias, self.stride, self.padding, self.dilation, self.groups
-        )
-        
-        return output
-
+        return F.conv2d(x_q, w_q, self.bias, self.stride, self.padding, self.dilation, self.groups)
 
 class QuantLinear(nn.Linear):
     def __init__(self, in_features, out_features, bias=True, 
                  w_bits=8, a_bits=8, all_positive=False, per_channel=False, batch_init=20):
         super(QuantLinear, self).__init__(in_features, out_features, bias)
-        
-        # Weight quantizer
-        shape = self.weight.shape
-        self.weight_quantizer = LSQPlusWeightQuantizer(w_bits, all_positive, per_channel, batch_init, shape)
-        
-        # Activation quantizer
+        self.weight_quantizer = LSQPlusWeightQuantizer(w_bits, all_positive, per_channel, batch_init, self.weight.shape)
         self.act_quantizer = LSQPlusActivationQuantizer(a_bits, all_positive, batch_init)
     
     def forward(self, x):
-        # Quantize input activations
         x_q = self.act_quantizer(x)
-        
-        # Quantize weights
         w_q = self.weight_quantizer(self.weight)
-        
-        # Use quantized values for linear operation
-        output = F.linear(x_q, w_q, self.bias)
-        
-        return output
-
+        return F.linear(x_q, w_q, self.bias)
 
 def prepare(model, w_bits=8, a_bits=8, all_positive=False, per_channel=False, batch_init=20):
     """

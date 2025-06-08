@@ -1,0 +1,262 @@
+--- Testing Model: ./model/base_model_out.c ---
+
+--- Results for Image 0 ---
+  Logits: [-7.115346, -7.075344, -9.867791, +11.963882, -11.620197, -0.274273, -5.448483, -9.865868, -6.366589, -8.034879]
+  Predicted Class: 3, True Label: 3
+
+--- Results for Image 1 ---
+  Logits: [+3.673051, +9.443042, -11.923853, -11.426817, -18.502941, -13.861213, -10.878578, -12.668652, +18.046549, -0.837843]
+  Predicted Class: 8, True Label: 8
+
+--- Results for Image 2 ---
+  Logits: [+0.477849, +4.638241, -5.695080, -8.775062, -16.083567, -7.796614, -14.365509, -5.741503, +8.489001, +3.975621]
+  Predicted Class: 8, True Label: 8
+
+--------------------------------------------------
+Total inference time for 3 images: 1.130732 seconds
+--------------------------------------------------
+
+real	0m1.132s
+user	0m1.130s
+sys	0m0.002s
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  ms/call  ms/call  name    
+ 25.66      0.29     0.29        3    96.67    96.67  node__features_features_3_Conv
+ 24.78      0.57     0.28        3    93.33    93.33  node__features_features_10_Conv
+ 21.24      0.81     0.24        3    80.00    80.00  node__features_features_17_Conv
+ 14.16      0.97     0.16        3    53.33    53.33  node__features_features_7_Conv
+ 11.50      1.10     0.13        3    43.33    43.33  node__features_features_14_Conv
+  1.77      1.12     0.02        3     6.67     6.67  node__features_features_0_Conv
+  0.88      1.13     0.01        3     3.33     3.33  node__features_features_20_MaxPool
+  0.00      1.13     0.00        3     0.00   376.67  entry
+  0.00      1.13     0.00        3     0.00     0.00  get_predicted_class
+  0.00      1.13     0.00        3     0.00     0.00  node__classifier_Gemm
+  0.00      1.13     0.00        3     0.00     0.00  node__features_features_12_Relu
+  0.00      1.13     0.00        3     0.00     0.00  node__features_features_13_MaxPool
+  0.00      1.13     0.00        3     0.00     0.00  node__features_features_16_Relu
+  0.00      1.13     0.00        3     0.00     0.00  node__features_features_19_Relu
+  0.00      1.13     0.00        3     0.00     0.00  node__features_features_2_Relu
+  0.00      1.13     0.00        3     0.00     0.00  node__features_features_5_Relu
+  0.00      1.13     0.00        3     0.00     0.00  node__features_features_6_MaxPool
+  0.00      1.13     0.00        3     0.00     0.00  node__features_features_9_Relu
+  0.00      1.13     0.00        3     0.00     0.00  print_logits
+
+ %         the percentage of the total running time of the
+time       program used by this function.
+
+cumulative a running sum of the number of seconds accounted
+ seconds   for by this function and those listed above it.
+
+ self      the number of seconds accounted for by this
+seconds    function alone.  This is the major sort for this
+           listing.
+
+calls      the number of times this function was invoked, if
+           this function is profiled, else blank.
+
+ self      the average number of milliseconds spent in this
+ms/call    function per call, if this function is profiled,
+	   else blank.
+
+ total     the average number of milliseconds spent in this
+ms/call    function and its descendents per call, if this
+	   function is profiled, else blank.
+
+name       the name of the function.  This is the minor sort
+           for this listing. The index shows the location of
+	   the function in the gprof listing. If the index is
+	   in parenthesis it shows where it would appear in
+	   the gprof listing if it were to be printed.
+
+Copyright (C) 2012-2024 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+		     Call graph (explanation follows)
+
+
+granularity: each sample hit covers 4 byte(s) for 0.88% of 1.13 seconds
+
+index % time    self  children    called     name
+                0.00    1.13       3/3           main [2]
+[1]    100.0    0.00    1.13       3         entry [1]
+                0.29    0.00       3/3           node__features_features_3_Conv [3]
+                0.28    0.00       3/3           node__features_features_10_Conv [4]
+                0.24    0.00       3/3           node__features_features_17_Conv [5]
+                0.16    0.00       3/3           node__features_features_7_Conv [6]
+                0.13    0.00       3/3           node__features_features_14_Conv [7]
+                0.02    0.00       3/3           node__features_features_0_Conv [8]
+                0.01    0.00       3/3           node__features_features_20_MaxPool [9]
+                0.00    0.00       3/3           node__features_features_2_Relu [16]
+                0.00    0.00       3/3           node__features_features_5_Relu [17]
+                0.00    0.00       3/3           node__features_features_6_MaxPool [18]
+                0.00    0.00       3/3           node__features_features_9_Relu [19]
+                0.00    0.00       3/3           node__features_features_12_Relu [12]
+                0.00    0.00       3/3           node__features_features_13_MaxPool [13]
+                0.00    0.00       3/3           node__features_features_16_Relu [14]
+                0.00    0.00       3/3           node__features_features_19_Relu [15]
+                0.00    0.00       3/3           node__classifier_Gemm [11]
+-----------------------------------------------
+                                                 <spontaneous>
+[2]    100.0    0.00    1.13                 main [2]
+                0.00    1.13       3/3           entry [1]
+                0.00    0.00       3/3           get_predicted_class [10]
+                0.00    0.00       3/3           print_logits [20]
+-----------------------------------------------
+                0.29    0.00       3/3           entry [1]
+[3]     25.7    0.29    0.00       3         node__features_features_3_Conv [3]
+-----------------------------------------------
+                0.28    0.00       3/3           entry [1]
+[4]     24.8    0.28    0.00       3         node__features_features_10_Conv [4]
+-----------------------------------------------
+                0.24    0.00       3/3           entry [1]
+[5]     21.2    0.24    0.00       3         node__features_features_17_Conv [5]
+-----------------------------------------------
+                0.16    0.00       3/3           entry [1]
+[6]     14.2    0.16    0.00       3         node__features_features_7_Conv [6]
+-----------------------------------------------
+                0.13    0.00       3/3           entry [1]
+[7]     11.5    0.13    0.00       3         node__features_features_14_Conv [7]
+-----------------------------------------------
+                0.02    0.00       3/3           entry [1]
+[8]      1.8    0.02    0.00       3         node__features_features_0_Conv [8]
+-----------------------------------------------
+                0.01    0.00       3/3           entry [1]
+[9]      0.9    0.01    0.00       3         node__features_features_20_MaxPool [9]
+-----------------------------------------------
+                0.00    0.00       3/3           main [2]
+[10]     0.0    0.00    0.00       3         get_predicted_class [10]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[11]     0.0    0.00    0.00       3         node__classifier_Gemm [11]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[12]     0.0    0.00    0.00       3         node__features_features_12_Relu [12]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[13]     0.0    0.00    0.00       3         node__features_features_13_MaxPool [13]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[14]     0.0    0.00    0.00       3         node__features_features_16_Relu [14]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[15]     0.0    0.00    0.00       3         node__features_features_19_Relu [15]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[16]     0.0    0.00    0.00       3         node__features_features_2_Relu [16]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[17]     0.0    0.00    0.00       3         node__features_features_5_Relu [17]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[18]     0.0    0.00    0.00       3         node__features_features_6_MaxPool [18]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[19]     0.0    0.00    0.00       3         node__features_features_9_Relu [19]
+-----------------------------------------------
+                0.00    0.00       3/3           main [2]
+[20]     0.0    0.00    0.00       3         print_logits [20]
+-----------------------------------------------
+
+ This table describes the call tree of the program, and was sorted by
+ the total amount of time spent in each function and its children.
+
+ Each entry in this table consists of several lines.  The line with the
+ index number at the left hand margin lists the current function.
+ The lines above it list the functions that called this function,
+ and the lines below it list the functions this one called.
+ This line lists:
+     index	A unique number given to each element of the table.
+		Index numbers are sorted numerically.
+		The index number is printed next to every function name so
+		it is easier to look up where the function is in the table.
+
+     % time	This is the percentage of the `total' time that was spent
+		in this function and its children.  Note that due to
+		different viewpoints, functions excluded by options, etc,
+		these numbers will NOT add up to 100%.
+
+     self	This is the total amount of time spent in this function.
+
+     children	This is the total amount of time propagated into this
+		function by its children.
+
+     called	This is the number of times the function was called.
+		If the function called itself recursively, the number
+		only includes non-recursive calls, and is followed by
+		a `+' and the number of recursive calls.
+
+     name	The name of the current function.  The index number is
+		printed after it.  If the function is a member of a
+		cycle, the cycle number is printed between the
+		function's name and the index number.
+
+
+ For the function's parents, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the function into this parent.
+
+     children	This is the amount of time that was propagated from
+		the function's children into this parent.
+
+     called	This is the number of times this parent called the
+		function `/' the total number of times the function
+		was called.  Recursive calls to the function are not
+		included in the number after the `/'.
+
+     name	This is the name of the parent.  The parent's index
+		number is printed after it.  If the parent is a
+		member of a cycle, the cycle number is printed between
+		the name and the index number.
+
+ If the parents of the function cannot be determined, the word
+ `<spontaneous>' is printed in the `name' field, and all the other
+ fields are blank.
+
+ For the function's children, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the child into the function.
+
+     children	This is the amount of time that was propagated from the
+		child's children to the function.
+
+     called	This is the number of times the function called
+		this child `/' the total number of times the child
+		was called.  Recursive calls by the child are not
+		listed in the number after the `/'.
+
+     name	This is the name of the child.  The child's index
+		number is printed after it.  If the child is a
+		member of a cycle, the cycle number is printed
+		between the name and the index number.
+
+ If there are any cycles (circles) in the call graph, there is an
+ entry for the cycle-as-a-whole.  This entry shows who called the
+ cycle (as parents) and the members of the cycle (as children.)
+ The `+' recursive calls entry shows the number of function calls that
+ were internal to the cycle, and the calls entry for each member shows,
+ for that member, how many times it was called from other members of
+ the cycle.
+
+Copyright (C) 2012-2024 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+Index by function name
+
+   [1] entry                   [7] node__features_features_14_Conv [17] node__features_features_5_Relu
+  [10] get_predicted_class    [14] node__features_features_16_Relu [18] node__features_features_6_MaxPool
+  [11] node__classifier_Gemm   [5] node__features_features_17_Conv [6] node__features_features_7_Conv
+   [8] node__features_features_0_Conv [15] node__features_features_19_Relu [19] node__features_features_9_Relu
+   [4] node__features_features_10_Conv [9] node__features_features_20_MaxPool [20] print_logits
+  [12] node__features_features_12_Relu [16] node__features_features_2_Relu
+  [13] node__features_features_13_MaxPool [3] node__features_features_3_Conv

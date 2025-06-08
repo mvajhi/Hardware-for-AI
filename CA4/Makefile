@@ -2,7 +2,7 @@
 
 # Compiler and flags
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c11 -O2 -lm -D_POSIX_C_SOURCE=199309L
+CFLAGS = -Wall -Wextra -std=c11 -Og -lm -D_POSIX_C_SOURCE=199309L -pg
 
 # The main C file for testing
 MAIN_SRC = main_compare.c

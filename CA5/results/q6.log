@@ -1,0 +1,368 @@
+--- Testing Model: ./model/q6.c ---
+
+--- Results for Image 0 ---
+  Logits: [-9.742605, -10.091438, -7.240261, +10.314564, -13.031570, -5.096244, -7.683680, -9.931599, -10.605585, -11.779073]
+  Predicted Class: 3, True Label: 3
+
+--- Results for Image 1 ---
+  Logits: [+7.824708, +12.895650, -18.311428, -14.016900, -21.281385, -24.773722, -17.330744, -20.808477, +24.369431, -6.033176]
+  Predicted Class: 8, True Label: 8
+
+--- Results for Image 2 ---
+  Logits: [-1.479768, +4.383913, -8.217711, -9.548512, -16.700287, -7.039883, -13.111302, -6.113712, +2.430023, -2.664546]
+  Predicted Class: 1, True Label: 8
+
+--------------------------------------------------
+Total inference time for 3 images: 1.251435 seconds
+--------------------------------------------------
+
+real	0m1.253s
+user	0m1.247s
+sys	0m0.005s
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  ms/call  ms/call  name    
+ 26.40      0.33     0.33        3   110.00   110.00  node__features_features_3_Conv
+ 23.20      0.62     0.29        3    96.67    96.67  node__features_features_10_Conv
+ 21.60      0.89     0.27        3    90.00    90.00  node__features_features_17_Conv
+ 12.80      1.05     0.16        3    53.33    53.33  node__features_features_14_Conv
+ 11.20      1.19     0.14        3    46.67    46.67  node__features_features_7_Conv
+  1.60      1.21     0.02        3     6.67     6.67  node__features_features_0_Conv
+  0.80      1.22     0.01        3     3.33     3.33  node__features_features_14_weight_quantizer_WLSQPlus
+  0.80      1.23     0.01        3     3.33     3.33  node__features_features_17_weight_quantizer_WLSQPlus
+  0.80      1.24     0.01        3     3.33     3.33  node__features_features_7_weight_quantizer_WLSQPlus
+  0.80      1.25     0.01        3     3.33     3.33  node__features_features_9_Relu
+  0.00      1.25     0.00        3     0.00   416.67  entry
+  0.00      1.25     0.00        3     0.00     0.00  get_predicted_class
+  0.00      1.25     0.00        3     0.00     0.00  node__classifier_Gemm
+  0.00      1.25     0.00        3     0.00     0.00  node__classifier_act_quantizer_ALSQPlus
+  0.00      1.25     0.00        3     0.00     0.00  node__classifier_weight_quantizer_WLSQPlus
+  0.00      1.25     0.00        3     0.00     0.00  node__features_features_0_act_quantizer_ALSQPlus
+  0.00      1.25     0.00        3     0.00     0.00  node__features_features_0_weight_quantizer_WLSQPlus
+  0.00      1.25     0.00        3     0.00     0.00  node__features_features_10_act_quantizer_ALSQPlus
+  0.00      1.25     0.00        3     0.00     0.00  node__features_features_10_weight_quantizer_WLSQPlus
+  0.00      1.25     0.00        3     0.00     0.00  node__features_features_11_BatchNormalization
+  0.00      1.25     0.00        3     0.00     0.00  node__features_features_12_Relu
+  0.00      1.25     0.00        3     0.00     0.00  node__features_features_13_MaxPool
+  0.00      1.25     0.00        3     0.00     0.00  node__features_features_14_act_quantizer_ALSQPlus
+  0.00      1.25     0.00        3     0.00     0.00  node__features_features_15_BatchNormalization
+  0.00      1.25     0.00        3     0.00     0.00  node__features_features_16_Relu
+  0.00      1.25     0.00        3     0.00     0.00  node__features_features_17_act_quantizer_ALSQPlus
+  0.00      1.25     0.00        3     0.00     0.00  node__features_features_18_BatchNormalization
+  0.00      1.25     0.00        3     0.00     0.00  node__features_features_19_Relu
+  0.00      1.25     0.00        3     0.00     0.00  node__features_features_1_BatchNormalization
+  0.00      1.25     0.00        3     0.00     0.00  node__features_features_20_MaxPool
+  0.00      1.25     0.00        3     0.00     0.00  node__features_features_2_Relu
+  0.00      1.25     0.00        3     0.00     0.00  node__features_features_3_act_quantizer_ALSQPlus
+  0.00      1.25     0.00        3     0.00     0.00  node__features_features_3_weight_quantizer_WLSQPlus
+  0.00      1.25     0.00        3     0.00     0.00  node__features_features_4_BatchNormalization
+  0.00      1.25     0.00        3     0.00     0.00  node__features_features_5_Relu
+  0.00      1.25     0.00        3     0.00     0.00  node__features_features_6_MaxPool
+  0.00      1.25     0.00        3     0.00     0.00  node__features_features_7_act_quantizer_ALSQPlus
+  0.00      1.25     0.00        3     0.00     0.00  node__features_features_8_BatchNormalization
+  0.00      1.25     0.00        3     0.00     0.00  print_logits
+
+ %         the percentage of the total running time of the
+time       program used by this function.
+
+cumulative a running sum of the number of seconds accounted
+ seconds   for by this function and those listed above it.
+
+ self      the number of seconds accounted for by this
+seconds    function alone.  This is the major sort for this
+           listing.
+
+calls      the number of times this function was invoked, if
+           this function is profiled, else blank.
+
+ self      the average number of milliseconds spent in this
+ms/call    function per call, if this function is profiled,
+	   else blank.
+
+ total     the average number of milliseconds spent in this
+ms/call    function and its descendents per call, if this
+	   function is profiled, else blank.
+
+name       the name of the function.  This is the minor sort
+           for this listing. The index shows the location of
+	   the function in the gprof listing. If the index is
+	   in parenthesis it shows where it would appear in
+	   the gprof listing if it were to be printed.
+
+Copyright (C) 2012-2024 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+		     Call graph (explanation follows)
+
+
+granularity: each sample hit covers 4 byte(s) for 0.80% of 1.25 seconds
+
+index % time    self  children    called     name
+                0.00    1.25       3/3           main [2]
+[1]    100.0    0.00    1.25       3         entry [1]
+                0.33    0.00       3/3           node__features_features_3_Conv [3]
+                0.29    0.00       3/3           node__features_features_10_Conv [4]
+                0.27    0.00       3/3           node__features_features_17_Conv [5]
+                0.16    0.00       3/3           node__features_features_14_Conv [6]
+                0.14    0.00       3/3           node__features_features_7_Conv [7]
+                0.02    0.00       3/3           node__features_features_0_Conv [8]
+                0.01    0.00       3/3           node__features_features_7_weight_quantizer_WLSQPlus [11]
+                0.01    0.00       3/3           node__features_features_9_Relu [12]
+                0.01    0.00       3/3           node__features_features_14_weight_quantizer_WLSQPlus [9]
+                0.01    0.00       3/3           node__features_features_17_weight_quantizer_WLSQPlus [10]
+                0.00    0.00       3/3           node__features_features_0_act_quantizer_ALSQPlus [17]
+                0.00    0.00       3/3           node__features_features_0_weight_quantizer_WLSQPlus [18]
+                0.00    0.00       3/3           node__features_features_1_BatchNormalization [30]
+                0.00    0.00       3/3           node__features_features_2_Relu [32]
+                0.00    0.00       3/3           node__features_features_3_act_quantizer_ALSQPlus [33]
+                0.00    0.00       3/3           node__features_features_3_weight_quantizer_WLSQPlus [34]
+                0.00    0.00       3/3           node__features_features_4_BatchNormalization [35]
+                0.00    0.00       3/3           node__features_features_5_Relu [36]
+                0.00    0.00       3/3           node__features_features_6_MaxPool [37]
+                0.00    0.00       3/3           node__features_features_7_act_quantizer_ALSQPlus [38]
+                0.00    0.00       3/3           node__features_features_8_BatchNormalization [39]
+                0.00    0.00       3/3           node__features_features_10_act_quantizer_ALSQPlus [19]
+                0.00    0.00       3/3           node__features_features_10_weight_quantizer_WLSQPlus [20]
+                0.00    0.00       3/3           node__features_features_11_BatchNormalization [21]
+                0.00    0.00       3/3           node__features_features_13_MaxPool [23]
+                0.00    0.00       3/3           node__features_features_12_Relu [22]
+                0.00    0.00       3/3           node__features_features_14_act_quantizer_ALSQPlus [24]
+                0.00    0.00       3/3           node__features_features_15_BatchNormalization [25]
+                0.00    0.00       3/3           node__features_features_16_Relu [26]
+                0.00    0.00       3/3           node__features_features_17_act_quantizer_ALSQPlus [27]
+                0.00    0.00       3/3           node__features_features_19_Relu [29]
+                0.00    0.00       3/3           node__features_features_18_BatchNormalization [28]
+                0.00    0.00       3/3           node__features_features_20_MaxPool [31]
+                0.00    0.00       3/3           node__classifier_act_quantizer_ALSQPlus [15]
+                0.00    0.00       3/3           node__classifier_weight_quantizer_WLSQPlus [16]
+                0.00    0.00       3/3           node__classifier_Gemm [14]
+-----------------------------------------------
+                                                 <spontaneous>
+[2]    100.0    0.00    1.25                 main [2]
+                0.00    1.25       3/3           entry [1]
+                0.00    0.00       3/3           get_predicted_class [13]
+                0.00    0.00       3/3           print_logits [40]
+-----------------------------------------------
+                0.33    0.00       3/3           entry [1]
+[3]     26.4    0.33    0.00       3         node__features_features_3_Conv [3]
+-----------------------------------------------
+                0.29    0.00       3/3           entry [1]
+[4]     23.2    0.29    0.00       3         node__features_features_10_Conv [4]
+-----------------------------------------------
+                0.27    0.00       3/3           entry [1]
+[5]     21.6    0.27    0.00       3         node__features_features_17_Conv [5]
+-----------------------------------------------
+                0.16    0.00       3/3           entry [1]
+[6]     12.8    0.16    0.00       3         node__features_features_14_Conv [6]
+-----------------------------------------------
+                0.14    0.00       3/3           entry [1]
+[7]     11.2    0.14    0.00       3         node__features_features_7_Conv [7]
+-----------------------------------------------
+                0.02    0.00       3/3           entry [1]
+[8]      1.6    0.02    0.00       3         node__features_features_0_Conv [8]
+-----------------------------------------------
+                0.01    0.00       3/3           entry [1]
+[9]      0.8    0.01    0.00       3         node__features_features_14_weight_quantizer_WLSQPlus [9]
+-----------------------------------------------
+                0.01    0.00       3/3           entry [1]
+[10]     0.8    0.01    0.00       3         node__features_features_17_weight_quantizer_WLSQPlus [10]
+-----------------------------------------------
+                0.01    0.00       3/3           entry [1]
+[11]     0.8    0.01    0.00       3         node__features_features_7_weight_quantizer_WLSQPlus [11]
+-----------------------------------------------
+                0.01    0.00       3/3           entry [1]
+[12]     0.8    0.01    0.00       3         node__features_features_9_Relu [12]
+-----------------------------------------------
+                0.00    0.00       3/3           main [2]
+[13]     0.0    0.00    0.00       3         get_predicted_class [13]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[14]     0.0    0.00    0.00       3         node__classifier_Gemm [14]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[15]     0.0    0.00    0.00       3         node__classifier_act_quantizer_ALSQPlus [15]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[16]     0.0    0.00    0.00       3         node__classifier_weight_quantizer_WLSQPlus [16]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[17]     0.0    0.00    0.00       3         node__features_features_0_act_quantizer_ALSQPlus [17]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[18]     0.0    0.00    0.00       3         node__features_features_0_weight_quantizer_WLSQPlus [18]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[19]     0.0    0.00    0.00       3         node__features_features_10_act_quantizer_ALSQPlus [19]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[20]     0.0    0.00    0.00       3         node__features_features_10_weight_quantizer_WLSQPlus [20]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[21]     0.0    0.00    0.00       3         node__features_features_11_BatchNormalization [21]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[22]     0.0    0.00    0.00       3         node__features_features_12_Relu [22]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[23]     0.0    0.00    0.00       3         node__features_features_13_MaxPool [23]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[24]     0.0    0.00    0.00       3         node__features_features_14_act_quantizer_ALSQPlus [24]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[25]     0.0    0.00    0.00       3         node__features_features_15_BatchNormalization [25]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[26]     0.0    0.00    0.00       3         node__features_features_16_Relu [26]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[27]     0.0    0.00    0.00       3         node__features_features_17_act_quantizer_ALSQPlus [27]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[28]     0.0    0.00    0.00       3         node__features_features_18_BatchNormalization [28]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[29]     0.0    0.00    0.00       3         node__features_features_19_Relu [29]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[30]     0.0    0.00    0.00       3         node__features_features_1_BatchNormalization [30]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[31]     0.0    0.00    0.00       3         node__features_features_20_MaxPool [31]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[32]     0.0    0.00    0.00       3         node__features_features_2_Relu [32]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[33]     0.0    0.00    0.00       3         node__features_features_3_act_quantizer_ALSQPlus [33]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[34]     0.0    0.00    0.00       3         node__features_features_3_weight_quantizer_WLSQPlus [34]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[35]     0.0    0.00    0.00       3         node__features_features_4_BatchNormalization [35]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[36]     0.0    0.00    0.00       3         node__features_features_5_Relu [36]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[37]     0.0    0.00    0.00       3         node__features_features_6_MaxPool [37]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[38]     0.0    0.00    0.00       3         node__features_features_7_act_quantizer_ALSQPlus [38]
+-----------------------------------------------
+                0.00    0.00       3/3           entry [1]
+[39]     0.0    0.00    0.00       3         node__features_features_8_BatchNormalization [39]
+-----------------------------------------------
+                0.00    0.00       3/3           main [2]
+[40]     0.0    0.00    0.00       3         print_logits [40]
+-----------------------------------------------
+
+ This table describes the call tree of the program, and was sorted by
+ the total amount of time spent in each function and its children.
+
+ Each entry in this table consists of several lines.  The line with the
+ index number at the left hand margin lists the current function.
+ The lines above it list the functions that called this function,
+ and the lines below it list the functions this one called.
+ This line lists:
+     index	A unique number given to each element of the table.
+		Index numbers are sorted numerically.
+		The index number is printed next to every function name so
+		it is easier to look up where the function is in the table.
+
+     % time	This is the percentage of the `total' time that was spent
+		in this function and its children.  Note that due to
+		different viewpoints, functions excluded by options, etc,
+		these numbers will NOT add up to 100%.
+
+     self	This is the total amount of time spent in this function.
+
+     children	This is the total amount of time propagated into this
+		function by its children.
+
+     called	This is the number of times the function was called.
+		If the function called itself recursively, the number
+		only includes non-recursive calls, and is followed by
+		a `+' and the number of recursive calls.
+
+     name	The name of the current function.  The index number is
+		printed after it.  If the function is a member of a
+		cycle, the cycle number is printed between the
+		function's name and the index number.
+
+
+ For the function's parents, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the function into this parent.
+
+     children	This is the amount of time that was propagated from
+		the function's children into this parent.
+
+     called	This is the number of times this parent called the
+		function `/' the total number of times the function
+		was called.  Recursive calls to the function are not
+		included in the number after the `/'.
+
+     name	This is the name of the parent.  The parent's index
+		number is printed after it.  If the parent is a
+		member of a cycle, the cycle number is printed between
+		the name and the index number.
+
+ If the parents of the function cannot be determined, the word
+ `<spontaneous>' is printed in the `name' field, and all the other
+ fields are blank.
+
+ For the function's children, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the child into the function.
+
+     children	This is the amount of time that was propagated from the
+		child's children to the function.
+
+     called	This is the number of times the function called
+		this child `/' the total number of times the child
+		was called.  Recursive calls by the child are not
+		listed in the number after the `/'.
+
+     name	This is the name of the child.  The child's index
+		number is printed after it.  If the child is a
+		member of a cycle, the cycle number is printed
+		between the name and the index number.
+
+ If there are any cycles (circles) in the call graph, there is an
+ entry for the cycle-as-a-whole.  This entry shows who called the
+ cycle (as parents) and the members of the cycle (as children.)
+ The `+' recursive calls entry shows the number of function calls that
+ were internal to the cycle, and the calls entry for each member shows,
+ for that member, how many times it was called from other members of
+ the cycle.
+
+Copyright (C) 2012-2024 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+Index by function name
+
+   [1] entry                  [23] node__features_features_13_MaxPool [32] node__features_features_2_Relu
+  [13] get_predicted_class     [6] node__features_features_14_Conv [3] node__features_features_3_Conv
+  [14] node__classifier_Gemm  [24] node__features_features_14_act_quantizer_ALSQPlus [33] node__features_features_3_act_quantizer_ALSQPlus
+  [15] node__classifier_act_quantizer_ALSQPlus [9] node__features_features_14_weight_quantizer_WLSQPlus [34] node__features_features_3_weight_quantizer_WLSQPlus
+  [16] node__classifier_weight_quantizer_WLSQPlus [25] node__features_features_15_BatchNormalization [35] node__features_features_4_BatchNormalization
+   [8] node__features_features_0_Conv [26] node__features_features_16_Relu [36] node__features_features_5_Relu
+  [17] node__features_features_0_act_quantizer_ALSQPlus [5] node__features_features_17_Conv [37] node__features_features_6_MaxPool
+  [18] node__features_features_0_weight_quantizer_WLSQPlus [27] node__features_features_17_act_quantizer_ALSQPlus [7] node__features_features_7_Conv
+   [4] node__features_features_10_Conv [10] node__features_features_17_weight_quantizer_WLSQPlus [38] node__features_features_7_act_quantizer_ALSQPlus
+  [19] node__features_features_10_act_quantizer_ALSQPlus [28] node__features_features_18_BatchNormalization [11] node__features_features_7_weight_quantizer_WLSQPlus
+  [20] node__features_features_10_weight_quantizer_WLSQPlus [29] node__features_features_19_Relu [39] node__features_features_8_BatchNormalization
+  [21] node__features_features_11_BatchNormalization [30] node__features_features_1_BatchNormalization [12] node__features_features_9_Relu
+  [22] node__features_features_12_Relu [31] node__features_features_20_MaxPool [40] print_logits

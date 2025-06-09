@@ -1,0 +1,4 @@
+*.bin
+*images.h
+runner
+gmon.out
